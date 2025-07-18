@@ -184,7 +184,6 @@ export default function SensoresScreen({ navigation }) {
           ))
         )}
       </View>
-
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Home')}>
         <Text style={styles.buttonText}>Regresar a Home</Text>
       </TouchableOpacity>

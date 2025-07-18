@@ -30,7 +30,7 @@ function DrawerNavigator({ role, onLogout }) {
             case 'Home':
               iconName = focused ? 'home' : 'home-outline';
               break;
-            case 'About':
+            case '¿Por qué nace este proyecto?':
               iconName = focused ? 'information-circle' : 'information-circle-outline';
               break;
             case 'Sensores':
@@ -54,7 +54,7 @@ function DrawerNavigator({ role, onLogout }) {
       <Drawer.Screen name="Home">
         {() => <HomeScreen onLogout={onLogout} />}
       </Drawer.Screen>
-      <Drawer.Screen name="About" component={AboutScreen} />
+      <Drawer.Screen name="¿Por qué nace este proyecto?" component={AboutScreen} />
 
       {/* Solo admin ve estas */}
       {role === 'admin' && (

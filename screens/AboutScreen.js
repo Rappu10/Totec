@@ -7,8 +7,25 @@ export default function AboutScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>¿Quiénes Somos?</Text>
         <Text style={styles.description}>
-          Somos un equipo apasionado por la tecnología y la innovación que busca transformar el mundo digital.
+          Incendios en nogaleras → pérdidas por más de $2.5 MDP (Durango, 2023).
+          Monitoreo manual e ineficiente (temperatura, humedad, gases).
+          Vigilancia costosa ante intrusos.
+          Falta de sistema preventivo e integrado.
         </Text>
+         <Text style={styles.description}>
+          Solución: Totec, un sistema de monitoreo y alerta para nogaleras.
+        </Text>
+        <Text style={styles.title}> Objetivo y razones para actuar</Text>
+        <Text style={styles.description}>
+          Objetivo general: Desarrollar un sistema inteligente que integre IoT y visión por computadora.
+
+¿Por qué?
+Prevenir incendios.
+Optimizar riego.
+Aumentar seguridad agrícola.
+Facilitar toma de decisiones en tiempo real.
+        </Text>
+        <Text style={styles.title}>Equipo de trabajo</Text>
 
         {/* Profile 1 */}
         <View style={styles.profileCard}>
@@ -24,7 +41,7 @@ export default function AboutScreen() {
         <View style={styles.profileCard}>
           <View style={styles.avatarPlaceholder} />
           <View style={styles.profileInfo}>
-            <Text style={styles.profileTitle}>Co-Fundador</Text>
+            <Text style={styles.profileTitle}>Amigo y Contacto</Text>
             <Text style={styles.profileName}>Pedro Said</Text>
             <Text style={styles.role}>Contacto de Referencia</Text>
           </View>
@@ -47,6 +64,7 @@ export default function AboutScreen() {
             <Text style={styles.profileTitle}>Desarrollador</Text>
             <Text style={styles.profileName}>Carlos Mendoza</Text>
             <Text style={styles.role}>Sistemas de Monitoreo</Text>
+            
           </View>
         </View>
       </View>
