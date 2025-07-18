@@ -18,12 +18,6 @@ export default function HomeScreen({ onLogout }) {
       image: require('../assets/fco 2.png')
     },
     {
-      id: 6,
-      name: "Ramona",
-      role: "Apoyo Técnico",
-      image: require('../assets/pug.jpeg')
-    },
-    {
       id: 2,
       name: "Jared Hernández",  
       role: "Frontend Specialist",
@@ -40,6 +34,12 @@ export default function HomeScreen({ onLogout }) {
       name: "Eduardo Dario",
       role: "MongoBD Designer",
       image: require('../assets/dario.webp')
+    },
+    {
+      id: 6,
+      name: "Ramona",
+      role: "Apoyo Técnico",
+      image: require('../assets/pug.jpeg')
     },
     {
       id: 5,
