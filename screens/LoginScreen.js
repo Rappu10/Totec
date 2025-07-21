@@ -8,24 +8,20 @@ import {
   Image,
   Modal,
   Pressable,
+  ActivityIndicator
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
+const BASE_URL = "https://backend-8np0.onrender.com";
+
 export default function LoginScreen({ onLogin }) {
+  const [onModalAccept, setOnModalAccept] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
+  const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
   const [modalMessage, setModalMessage] = useState('');
-  const [onModalAccept, setOnModalAccept] = useState(null);
-
-  const showModal = (title, message, onAccept = null) => {
-    setModalTitle(title);
-    setModalMessage(message);
-    setModalVisible(true);
-    setOnModalAccept(() => onAccept); // Guarda función para ejecutar al aceptar
-  };
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -33,40 +29,72 @@ export default function LoginScreen({ onLogin }) {
       return;
     }
 
+    setLoading(true);
+    
     try {
-      const response = await fetch('http://192.168.1.112:3000/login', {
+      const response = await fetch(`${BASE_URL}/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        showModal('Error', data.message || 'Error al iniciar sesión');
-      } else {
-        showModal('Éxito', 'Login exitoso', () => onLogin(data.role));
+        throw new Error(data.message || 'Error al iniciar sesión');
       }
+
+      showModal('Éxito', 'Inicio de sesión exitoso', () => {
+        onLogin(data.role, data.userId);
+      });
     } catch (error) {
-      console.error(error);
-      showModal('Error de red', 'No se pudo conectar al servidor');
+      showModal('Error', error.message || 'Error al conectar con el servidor');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const showModal = (title, message, onAccept = null) => {
+    setModalTitle(title);
+    setModalMessage(message);
+    setModalVisible(true);
+    if (onAccept) {
+      setOnModalAccept(() => onAccept);
     }
   };
 
   const enterWithoutAccount = () => {
-    showModal('Acceso sin cuenta', 'Entraste como invitado', () => onLogin('guest'));
+    showModal('Modo invitado', 'Estás entrando en modo de solo lectura', () => {
+      onLogin('guest');
+    });
   };
 
   return (
     <View style={styles.container}>
-      <LinearGradient colors={['#000', '#222']} style={styles.gradientBackground} />
-      <Image source={require('../assets/header-trees.png')} style={[styles.headerImage, { top: -60 }]} />
-      <Image source={require('../assets/totec-logo.png')} style={styles.logoImage} />
+      <LinearGradient 
+        colors={['#000', '#222']} 
+        style={styles.gradientBackground} 
+      />
+      
+      <Image 
+        source={require('../assets/header-trees.png')} 
+        style={styles.headerImage} 
+      />
+      
+      <Image 
+        source={require('../assets/totec-logo.png')} 
+        style={styles.logoImage} 
+      />
 
       <View style={styles.form}>
         <Text style={styles.label}>Usuario</Text>
         <TextInput
-          placeholder="Correo"
+          placeholder="Correo electrónico"
           placeholderTextColor="#888"
           value={email}
           onChangeText={setEmail}
@@ -85,40 +113,48 @@ export default function LoginScreen({ onLogin }) {
           style={styles.input}
         />
 
-        <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 20 }}>
-          <TouchableOpacity style={[styles.button, { width: 140, height: 40 }]} onPress={handleLogin}>
-            <Text style={[styles.buttonText, { fontSize: 15, color: '#fff' }]}>Iniciar Sesión</Text>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity 
+            style={[styles.button, styles.loginButton]} 
+            onPress={handleLogin}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Iniciar Sesión</Text>
+            )}
           </TouchableOpacity>
         </View>
 
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: '#777', width: 180, height: 40, alignSelf: 'center' }]}
+          style={[styles.button, styles.guestButton]}
           onPress={enterWithoutAccount}
         >
-          <Text style={[styles.buttonText, { fontSize: 15, color: '#fff' }]}>Entrar sin cuenta</Text>
+          <Text style={styles.buttonText}>Entrar como invitado</Text>
         </TouchableOpacity>
       </View>
 
-      <View style={{ marginTop: 30 }}>
-        <Text style={{ color: '#888', letterSpacing: 1, fontSize: 12 }}>BIENVENIDO</Text>
-        <Text style={{ fontSize: 14, color: 'rgb(101, 101, 101)' }}>
+      <View style={styles.footer}>
+        <Text style={styles.footerTitle}>BIENVENIDO</Text>
+        <Text style={styles.footerText}>
           Plataforma Inteligente de Monitoreo Agrícola para Nogalera
         </Text>
       </View>
 
-      {/* Modal personalizado */}
+      {/* Modal */}
       <Modal
         animationType="fade"
-        transparent={true}
+        transparent
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalBackground}>
-          <View style={styles.modalView}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>{modalTitle}</Text>
-            <Text style={styles.modalMessage}>{modalMessage}</Text>
-
-            <Pressable
+            <Text style={styles.modalText}>{modalMessage}</Text>
+            
+            <TouchableOpacity
               style={styles.modalButton}
               onPress={() => {
                 setModalVisible(false);
@@ -126,7 +162,7 @@ export default function LoginScreen({ onLogin }) {
               }}
             >
               <Text style={styles.modalButtonText}>Aceptar</Text>
-            </Pressable>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -137,91 +173,121 @@ export default function LoginScreen({ onLogin }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 24,
+    padding: 24,
     justifyContent: 'center',
-    position: 'relative',
   },
   gradientBackground: {
     ...StyleSheet.absoluteFillObject,
-    zIndex: -2,
+    zIndex: -1,
   },
   headerImage: {
     position: 'absolute',
     top: 0,
-    width: '100%',
+    width: '120%',
+    height: 200,
     resizeMode: 'cover',
+    opacity: 0.8,
   },
   logoImage: {
     width: 200,
     height: 80,
     resizeMode: 'contain',
     alignSelf: 'center',
-    marginBottom: 60,
+    marginBottom: 40,
     marginTop: 60,
   },
   form: {
-    marginBottom: 40,
+    marginBottom: 30,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 20,
+    borderRadius: 15,
   },
   label: {
     color: '#fff',
-    marginBottom: 4,
-    marginLeft: 4,
-    fontFamily: 'Inter',
-  },
-  input: {
-    backgroundColor: '#111',
-    color: '#fff',
-    paddingHorizontal: 16,
-    height: 52,
-    borderRadius: 12,
-    marginBottom: 16,
+    marginBottom: 8,
     fontSize: 16,
   },
+  input: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    color: '#fff',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 20,
+    fontSize: 16,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginBottom: 20,
+  },
   button: {
-    backgroundColor: '#C4A484',
-    borderRadius: 12,
-    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 10,
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loginButton: {
+    backgroundColor: '#4A9A2C',
+    minWidth: 140,
+  },
+  guestButton: {
+    backgroundColor: '#555',
+    alignSelf: 'center',
   },
   buttonText: {
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
   },
-
-  // Modal styles
-  modalBackground: {
+  footer: {
+    marginTop: 30,
+    alignItems: 'center',
+  },
+  footerTitle: {
+    color: '#888',
+    fontSize: 12,
+    letterSpacing: 1,
+    marginBottom: 5,
+  },
+  footerText: {
+    color: '#666',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
-  },
-  modalView: {
-    backgroundColor: '#222',
-    borderRadius: 12,
     padding: 20,
+  },
+  modalContainer: {
+    backgroundColor: '#333',
+    borderRadius: 15,
+    padding: 25,
     width: '100%',
-    maxWidth: 360,
+    maxWidth: 350,
     alignItems: 'center',
   },
   modalTitle: {
     color: '#4A9A2C',
-    fontWeight: 'bold',
     fontSize: 20,
-    marginBottom: 12,
+    fontWeight: 'bold',
+    marginBottom: 15,
   },
-  modalMessage: {
+  modalText: {
     color: '#eee',
     fontSize: 16,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 25,
+    lineHeight: 24,
   },
   modalButton: {
     backgroundColor: '#4A9A2C',
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 40,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 30,
   },
   modalButtonText: {
     color: '#fff',
