@@ -35,21 +35,31 @@ export default function SensoresScreen({ navigation }) {
     rotation.stopAnimation();
   };
 
-  const fetchSensores = async () => {
-    try {
-      setLoading(true);
-      startRotation();
-      const response = await fetch('http://192.168.1.112:3000/api/sensores');
-      if (!response.ok) throw new Error('Error al obtener sensores');
-      const data = await response.json();
-      setSensores(data);
-    } catch (error) {
-      Alert.alert('Error', error.message || 'No se pudieron cargar los sensores');
-    } finally {
-      setLoading(false);
-      stopRotation();
+const fetchSensores = async () => {
+  try {
+    setLoading(true);
+    startRotation();
+    
+    const BASE_URL = "https://backend-8np0.onrender.com";
+    const response = await fetch(`${BASE_URL}/api/sensores`);
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `Error ${response.status}`);
     }
-  };
+    
+    const data = await response.json();
+    console.log("Datos recibidos:", data); // Para depuración
+    
+    setSensores(data);
+  } catch (error) {
+    console.error('Error completo:', error);
+    Alert.alert('Error', `No se pudieron cargar los sensores: ${error.message}`);
+  } finally {
+    setLoading(false);
+    stopRotation();
+  }
+};
 
   useEffect(() => {
     fetchSensores();
