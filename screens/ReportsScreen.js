@@ -29,19 +29,30 @@ export default function ReportsScreen() {
   const API_URL = `${BASE_URL}/api/reports`; // Asegúrate que esta ruta exista en tu backend
 
   const fetchReports = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(API_URL);
-      if (!response.ok) throw new Error('Error al obtener reportes');
-      const data = await response.json();
-      setReports(data);
-    } catch (error) {
-      console.error('Error fetching reports:', error);
-      Alert.alert('Error', 'No se pudieron obtener los reportes');
-    } finally {
-      setLoading(false);
+  setLoading(true);
+  try {
+    const response = await fetch(API_URL);
+    
+    if (!response.ok) {
+      const errorData = await response.json(); // Para obtener mensajes de error del backend
+      throw new Error(errorData.message || `Error ${response.status}`);
     }
-  };
+    
+    const data = await response.json();
+    console.log("Datos recibidos:", data); // Para depuración
+    
+    if (!data || !Array.isArray(data)) {
+      throw new Error("Formato de datos inválido");
+    }
+    
+    setReports(data);
+  } catch (error) {
+    console.error('Error completo:', error);
+    Alert.alert('Error', `No se pudieron obtener los reportes: ${error.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const createReport = async () => {
     if (!latitude || !longitude || !descripcion) {
